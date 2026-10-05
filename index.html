@@ -1,131 +1,28 @@
-<!doctype html>
-<html lang="en">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#f7f7fb">
-<link rel="manifest" href="manifest.json">
-<title>Graham's Chores</title>
-<style>
-:root{--bg:#f7f7fb;--card:#fff;--text:#182033;--muted:#697386;--line:#e7e9ef;--good:#17844b;--warn:#a56600;--shadow:0 6px 22px rgba(20,28,45,.08)}
-*{box-sizing:border-box}body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:var(--bg);color:var(--text)}
-button,input,select{font:inherit}.wrap{max-width:820px;margin:auto;padding:18px 16px 100px}.top{display:flex;align-items:center;justify-content:space-between;gap:12px}
-h1{font-size:30px;margin:10px 0}h2{font-size:21px;margin:0 0 12px}h3{margin:0 0 8px}.sub{color:var(--muted)}
-.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin:16px 0}.stat,.card{background:var(--card);border-radius:20px;padding:16px;box-shadow:var(--shadow)}
-.stat b{font-size:26px;display:block;margin-top:4px}.money{color:var(--good)}
-.progress{height:16px;background:#eceef3;border-radius:99px;overflow:hidden;margin-top:10px}.progress>div{height:100%;background:#ffd34d;width:0}
-.section{margin-top:20px}.job{display:flex;align-items:center;gap:12px;padding:14px 0;border-top:1px solid var(--line)}.job:first-of-type{border-top:0}
-.icon{font-size:30px;width:42px;text-align:center}.jobmain{flex:1}.jobtitle{font-weight:750;font-size:18px}.value{color:var(--good);font-weight:800}
-.btn{border:0;border-radius:14px;padding:11px 14px;font-weight:750;background:#202a44;color:white}.btn.secondary{background:#eceff5;color:#202a44}.btn.good{background:var(--good)}.btn.warn{background:#fff1d6;color:#7b4b00}.btn.danger{background:#fde9e9;color:#9c2020}.btn:disabled{opacity:.45}
-.pill{display:inline-block;padding:7px 10px;border-radius:99px;background:#f0f2f7;color:var(--muted);font-size:13px;font-weight:700}.waiting{background:#fff3d9;color:#805000}.done{background:#e5f5eb;color:#126b3d}
-.nav{position:fixed;bottom:0;left:0;right:0;background:rgba(255,255,255,.96);border-top:1px solid var(--line);padding:10px max(16px,env(safe-area-inset-right)) calc(10px + env(safe-area-inset-bottom)) max(16px,env(safe-area-inset-left));display:flex;justify-content:center}
-.nav button{max-width:820px;width:100%}
-label{font-weight:700;font-size:14px;display:block;margin:12px 0 6px}input,select{width:100%;border:1px solid #d9dde6;border-radius:12px;padding:12px;background:white}
-.row{display:flex;gap:9px;align-items:center}.row>*{flex:1}.row .fit{flex:0 0 auto}
-.small{font-size:13px;color:var(--muted)}.hidden{display:none!important}.parentHead{display:flex;justify-content:space-between;align-items:center}.listrow{padding:12px 0;border-top:1px solid var(--line);display:flex;gap:10px;align-items:center}.listrow:first-child{border-top:0}.listrow .grow{flex:1}
-.tabs{display:flex;gap:8px;overflow:auto;margin:14px 0}.tabs button{white-space:nowrap}.empty{text-align:center;color:var(--muted);padding:20px 8px}
-.toast{position:fixed;top:18px;left:50%;transform:translateX(-50%);background:#182033;color:white;padding:12px 16px;border-radius:99px;z-index:10;display:none}
-@media(max-width:560px){.grid{grid-template-columns:1fr 1fr}.stat b{font-size:22px}.jobtitle{font-size:17px}.wrap{padding-top:8px}}
-</style>
-</head>
-<body>
-<div id="toast" class="toast"></div>
-<main class="wrap">
-<section id="kidView">
-  <div class="top"><div><div class="sub">⭐ GRAHAM'S CHORES</div><h1>My Jobs</h1></div><div style="font-size:46px">🧒</div></div>
-  <div class="grid">
-    <div class="stat"><span class="sub">This Week</span><b id="weekEarn" class="money">$0.00</b></div>
-    <div class="stat"><span class="sub">My Money</span><b id="balance" class="money">$0.00</b></div>
-  </div>
-  <div id="goalCard" class="card hidden"><h2>🎯 I'm Saving For</h2><div id="goalName" class="jobtitle"></div><div class="progress"><div id="goalBar"></div></div><div id="goalText" class="small" style="margin-top:8px"></div></div>
-  <div class="section card"><h2>🏠 My Responsibilities</h2><div id="respList"></div></div>
-  <div class="section card"><h2>💰 My Money Jobs</h2><div id="moneyList"></div></div>
-</section>
-
-<section id="pinView" class="hidden">
-  <h1>🔒 Parent Area</h1><div class="card">
-    <p id="pinPrompt" class="sub">Enter your parent PIN.</p>
-    <input id="pinInput" inputmode="numeric" maxlength="4" type="password" placeholder="4-digit PIN">
-    <button class="btn" style="width:100%;margin-top:12px" onclick="unlock()">Continue</button>
-    <button class="btn secondary" style="width:100%;margin-top:8px" onclick="showKid()">Cancel</button>
-  </div>
-</section>
-
-<section id="parentView" class="hidden">
- <div class="parentHead"><div><div class="sub">PARENT AREA</div><h1>Graham's Chores</h1></div><button class="btn secondary" onclick="showKid()">Done</button></div>
- <div class="tabs">
-  <button class="btn" onclick="tab('approve')">Approvals</button>
-  <button class="btn secondary" onclick="tab('week')">This Week</button>
-  <button class="btn secondary" onclick="tab('library')">Job Library</button>
-  <button class="btn secondary" onclick="tab('money')">Money</button>
-  <button class="btn secondary" onclick="tab('history')">History</button>
- </div>
- <div id="approveTab" class="card"></div>
- <div id="weekTab" class="card hidden"></div>
- <div id="libraryTab" class="card hidden"></div>
- <div id="moneyTab" class="card hidden"></div>
- <div id="historyTab" class="card hidden"></div>
-</section>
-</main>
-<div class="nav" id="nav"><button class="btn secondary" onclick="openParent()">🔒 Parent Area</button></div>
-<script>
-const K='grahamChoresV1';
-const defaults={
- pin:null, weekStart:null, weekEarned:0, balance:0,
- goal:{name:'',amount:0},
- responsibilities:[
-  {id:'r1',icon:'🛏️',name:'Make my bed'},
-  {id:'r2',icon:'🧸',name:'Pick up my toys'},
-  {id:'r3',icon:'👕',name:'Clothes in hamper'},
-  {id:'r4',icon:'🍽️',name:'Clear my dishes'}
- ],
- library:[
-  {id:'l1',icon:'🗑️',name:'Empty trash',value:.50},
-  {id:'l2',icon:'🧺',name:'Put away laundry',value:.50},
-  {id:'l3',icon:'🧹',name:'Vacuum an area',value:.75},
-  {id:'l4',icon:'🚗',name:'Help clean the car',value:1},
-  {id:'l5',icon:'🌳',name:'Help with yard work',value:1.5},
-  {id:'l6',icon:'🍽️',name:'Help with dishwasher',value:.50}
- ],
- weekJobs:[], pending:[], respDone:{}, history:[], transactions:[]
-};
-let d=load();
-function load(){try{return Object.assign({},defaults,JSON.parse(localStorage.getItem(K)||'{}'))}catch(e){return structuredClone(defaults)}}
-function save(){localStorage.setItem(K,JSON.stringify(d));renderKid()}
-function money(n){return '$'+Number(n||0).toFixed(2)}
-function today(){return new Date().toLocaleDateString()}
-function toast(s){let x=document.getElementById('toast');x.textContent=s;x.style.display='block';setTimeout(()=>x.style.display='none',1800)}
-function renderKid(){
- document.getElementById('weekEarn').textContent=money(d.weekEarned);document.getElementById('balance').textContent=money(d.balance);
- let gc=document.getElementById('goalCard'); if(d.goal?.name&&d.goal.amount>0){gc.classList.remove('hidden');goalName.textContent=d.goal.name;let p=Math.min(100,d.balance/d.goal.amount*100);goalBar.style.width=p+'%';goalText.textContent=`${money(d.balance)} of ${money(d.goal.amount)} • ${Math.round(p)}%`;}else gc.classList.add('hidden');
- respList.innerHTML=d.responsibilities.map(x=>`<div class="job"><div class="icon">${x.icon}</div><div class="jobmain"><div class="jobtitle">${x.name}</div></div>${d.respDone[x.id]?'<span class="pill done">Done ✓</span>':`<button class="btn secondary" onclick="doResp('${x.id}')">DONE ✓</button>`}</div>`).join('');
- moneyList.innerHTML=d.weekJobs.length?d.weekJobs.map(x=>{let pend=d.pending.find(p=>p.jobId===x.uid), done=x.approved;return `<div class="job"><div class="icon">${x.icon}</div><div class="jobmain"><div class="jobtitle">${x.name}</div><div class="value">${money(x.value)}</div></div>${done?'<span class="pill done">Approved ✓</span>':pend?'<span class="pill waiting">Waiting 👍</span>':`<button class="btn good" onclick="submitJob('${x.uid}')">DONE ✓</button>`}</div>`}).join(''):'<div class="empty">No money jobs assigned yet.</div>';
-}
-function doResp(id){d.respDone[id]=true;save();toast('Great job! ⭐')}
-function submitJob(id){let j=d.weekJobs.find(x=>x.uid===id);d.pending.push({id:Date.now().toString(),jobId:id,name:j.name,value:j.value,date:today()});save();toast('Sent to Mom or Dad! 👍')}
-function openParent(){kidView.classList.add('hidden');nav.classList.add('hidden');pinView.classList.remove('hidden');pinInput.value='';pinPrompt.textContent=d.pin?'Enter your parent PIN.':'Create a 4-digit parent PIN.'}
-function unlock(){let p=pinInput.value;if(!/^\d{4}$/.test(p)){toast('Use 4 numbers');return}if(!d.pin){d.pin=p;save()}else if(p!==d.pin){toast('Wrong PIN');return}pinView.classList.add('hidden');parentView.classList.remove('hidden');renderParent()}
-function showKid(){pinView.classList.add('hidden');parentView.classList.add('hidden');kidView.classList.remove('hidden');nav.classList.remove('hidden');renderKid()}
-function tab(n){['approve','week','library','money','history'].forEach(x=>document.getElementById(x+'Tab').classList.toggle('hidden',x!==n))}
-function renderParent(){
- approveTab.innerHTML='<h2>👍 Waiting for Approval</h2>'+(d.pending.length?d.pending.map(p=>`<div class="listrow"><div class="grow"><b>${p.name}</b><div class="small">${money(p.value)} • ${p.date}</div></div><button class="btn good" onclick="approve('${p.id}')">Approve</button><button class="btn danger" onclick="reject('${p.id}')">No</button></div>`).join(''):'<div class="empty">Nothing waiting right now.</div>');
- weekTab.innerHTML=`<h2>📅 This Week</h2><div class="small">Weekly earned: ${money(d.weekEarned)} • Running balance: ${money(d.balance)}</div><label>Add from Job Library</label><select id="addSel">${d.library.map(x=>`<option value="${x.id}">${x.icon} ${x.name} — ${money(x.value)}</option>`).join('')}</select><button class="btn" style="width:100%;margin-top:9px" onclick="addWeek()">+ Add Job</button><div style="margin-top:12px">${d.weekJobs.map(x=>`<div class="listrow"><div class="grow">${x.icon} <b>${x.name}</b> <span class="small">${money(x.value)}</span></div><button class="btn danger" onclick="removeWeek('${x.uid}')">Remove</button></div>`).join('')||'<div class="empty">No jobs assigned.</div>'}</div><button class="btn warn" style="width:100%;margin-top:14px" onclick="newWeek()">Start New Week</button>`;
- libraryTab.innerHTML=`<h2>🧰 Job Library</h2><div id="libRows">${d.library.map(x=>`<div class="listrow"><div class="grow">${x.icon} <b>${x.name}</b><div class="small">${money(x.value)}</div></div><button class="btn danger" onclick="delLib('${x.id}')">Delete</button></div>`).join('')}</div><h3 style="margin-top:18px">Create a Job</h3><div class="row"><div class="fit" style="width:72px"><label>Emoji</label><input id="newIcon" value="⭐"></div><div><label>Job</label><input id="newName" placeholder="New job"></div><div style="max-width:110px"><label>Value</label><input id="newVal" type="number" min="0" step=".25" value=".50"></div></div><button class="btn" style="width:100%;margin-top:10px" onclick="addLib()">Save Job</button>`;
- moneyTab.innerHTML=`<h2>💵 Money</h2><div class="grid"><div class="stat"><span class="sub">This Week</span><b>${money(d.weekEarned)}</b></div><div class="stat"><span class="sub">Balance</span><b>${money(d.balance)}</b></div></div><h3>🎯 Savings Goal</h3><label>What is Graham saving for?</label><input id="gName" value="${esc(d.goal?.name||'')}" placeholder="LEGO set"><label>Goal amount</label><input id="gAmt" type="number" step=".01" value="${d.goal?.amount||''}" placeholder="25"><button class="btn" style="width:100%;margin-top:9px" onclick="setGoal()">Save Goal</button><h3 style="margin-top:20px">Record Spending</h3><label>What did he buy?</label><input id="spName" placeholder="LEGO set"><label>Amount</label><input id="spAmt" type="number" step=".01" placeholder="12.00"><button class="btn warn" style="width:100%;margin-top:9px" onclick="spend()">Record Purchase</button><h3 style="margin-top:20px">PIN</h3><button class="btn secondary" onclick="changePin()">Change Parent PIN</button>`;
- historyTab.innerHTML=`<h2>📚 History</h2><h3>Weekly Earnings</h3>${d.history.length?d.history.slice().reverse().map(x=>`<div class="listrow"><div class="grow"><b>${x.label}</b></div><b>${money(x.earned)}</b></div>`).join(''):'<div class="empty">No completed weeks yet.</div>'}<h3 style="margin-top:18px">Money Activity</h3>${d.transactions.length?d.transactions.slice().reverse().map(x=>`<div class="listrow"><div class="grow"><b>${x.note}</b><div class="small">${x.date}</div></div><b>${x.amount>=0?'+':''}${money(x.amount)}</b></div>`).join(''):'<div class="empty">No money activity yet.</div>'}`;
-}
-function esc(s){return String(s).replaceAll('&','&amp;').replaceAll('"','&quot;').replaceAll('<','&lt;')}
-function approve(id){let p=d.pending.find(x=>x.id===id),j=d.weekJobs.find(x=>x.uid===p.jobId);if(j)j.approved=true;d.weekEarned+=p.value;d.balance+=p.value;d.transactions.push({date:today(),note:'Earned: '+p.name,amount:p.value});d.pending=d.pending.filter(x=>x.id!==id);save();renderParent();toast('Approved! 🎉')}
-function reject(id){d.pending=d.pending.filter(x=>x.id!==id);save();renderParent()}
-function addWeek(){let x=d.library.find(a=>a.id===addSel.value);d.weekJobs.push({...x,uid:'w'+Date.now(),approved:false});save();renderParent()}
-function removeWeek(id){d.weekJobs=d.weekJobs.filter(x=>x.uid!==id);d.pending=d.pending.filter(x=>x.jobId!==id);save();renderParent()}
-function addLib(){let n=newName.value.trim(),v=Number(newVal.value);if(!n||v<0)return;d.library.push({id:'l'+Date.now(),icon:newIcon.value||'⭐',name:n,value:v});save();renderParent()}
-function delLib(id){d.library=d.library.filter(x=>x.id!==id);save();renderParent()}
-function setGoal(){d.goal={name:gName.value.trim(),amount:Number(gAmt.value)||0};save();renderParent();toast('Goal saved')}
-function spend(){let a=Number(spAmt.value),n=spName.value.trim();if(!n||a<=0)return;if(a>d.balance&&!confirm('This is more than Graham’s current balance. Record it anyway?'))return;d.balance-=a;d.transactions.push({date:today(),note:'Spent: '+n,amount:-a});save();renderParent();toast('Purchase recorded')}
-function newWeek(){if(!confirm('Start a new week? This Week will reset to $0. Graham’s running balance will stay the same.'))return;d.history.push({label:'Week ending '+today(),earned:d.weekEarned});d.weekEarned=0;d.weekJobs=[];d.pending=[];d.respDone={};d.weekStart=today();save();renderParent();toast('New week started ⭐')}
-function changePin(){let p=prompt('Enter a new 4-digit PIN');if(p&&/^\d{4}$/.test(p)){d.pin=p;save();toast('PIN changed')}else if(p)toast('PIN must be 4 numbers')}
-renderKid();
-if('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(()=>{});
-</script>
-</body></html>
+<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><link rel="manifest" href="manifest.json"><title>Graham's Chores</title>
+<style>body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#f7f7fb;color:#172033;margin:0}.w{max-width:820px;margin:auto;padding:18px 16px 90px}.card{background:#fff;border-radius:20px;padding:16px;margin:14px 0;box-shadow:0 6px 22px #0001}.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.stat b{display:block;font-size:26px;color:#17844b}.job{display:flex;align-items:center;gap:10px;padding:13px 0;border-top:1px solid #e7e9ef}.job:first-child{border:0}.grow{flex:1}.btn{border:0;border-radius:13px;padding:10px 13px;font-weight:700;background:#202a44;color:#fff}.sec{background:#edf0f5;color:#202a44}.good{background:#17844b}.danger{background:#fde8e8;color:#982121}.hidden{display:none}.tabs{display:flex;gap:7px;overflow:auto}.tabs button{white-space:nowrap}input,select{width:100%;padding:11px;border:1px solid #d8dde6;border-radius:11px;box-sizing:border-box;margin:5px 0 10px}label{font-weight:700}.pill{font-size:12px;font-weight:700;background:#fff3d9;color:#805000;padding:7px 9px;border-radius:99px}.done{background:#e4f5eb;color:#126b3d}.small{color:#697386;font-size:13px}.login{max-width:460px;margin:50px auto}.row{display:flex;gap:8px;align-items:center}.money{color:#17844b;font-weight:800}@media(max-width:520px){.w{padding-top:8px}}</style></head><body><main class="w">
+<section id="login" class="login"><div class="card"><h1>⭐ Graham's Chores</h1><p class="small">Sign in once on this device.</p><label>Email</label><input id="email" type="email"><label>Password</label><input id="password" type="password"><button class="btn" style="width:100%" onclick="doLogin()">Sign In</button><p id="msg" class="small"></p></div></section>
+<section id="kid" class="hidden"><h1>⭐ My Jobs</h1><div class="grid"><div class="card stat">This Week<b id="kw">$0.00</b></div><div class="card stat">My Money<b id="kb">$0.00</b></div></div><div id="goal" class="card hidden"></div><div class="card"><h2>🏠 My Responsibilities</h2><div id="resps"></div></div><div class="card"><h2>💰 My Money Jobs</h2><div id="jobs"></div></div><button class="btn sec" onclick="doLogout()">Sign Out</button></section>
+<section id="parent" class="hidden"><h1>Parent Dashboard</h1><p class="small">Changes sync automatically to Graham's iPad.</p><div class="grid"><div class="card stat">This Week<b id="pw">$0.00</b></div><div class="card stat">Balance<b id="pb">$0.00</b></div></div><div class="tabs"><button class="btn" onclick="tab('ap')">Approvals</button><button class="btn sec" onclick="tab('wk')">This Week</button><button class="btn sec" onclick="tab('lib')">Job Library</button><button class="btn sec" onclick="tab('mon')">Money</button><button class="btn sec" onclick="tab('hist')">History</button></div><div id="ap" class="card"></div><div id="wk" class="card hidden"></div><div id="lib" class="card hidden"></div><div id="mon" class="card hidden"></div><div id="hist" class="card hidden"></div><button class="btn sec" onclick="doLogout()">Sign Out</button></section>
+</main><script type="module">
+import{initializeApp}from"https://www.gstatic.com/firebasejs/12.4.0/firebase-app.js";import{getAuth,signInWithEmailAndPassword,onAuthStateChanged,signOut,setPersistence,browserLocalPersistence}from"https://www.gstatic.com/firebasejs/12.4.0/firebase-auth.js";import{getFirestore,doc,getDoc,setDoc,updateDoc,collection,addDoc,deleteDoc,onSnapshot,serverTimestamp,increment,writeBatch}from"https://www.gstatic.com/firebasejs/12.4.0/firebase-firestore.js";
+const firebaseConfig={apiKey:"AIzaSyD3oGLEWtFHhmuHirOL8jxjqhjYx-rcWMU",authDomain:"grahams-chores.firebaseapp.com",projectId:"grahams-chores",storageBucket:"grahams-chores.firebasestorage.app",messagingSenderId:"634924367252",appId:"1:634924367252:web:028a2463bfb3f7e529a381"};const PARENT_UID="aDP5yAdPbpQ0QlSCjLNJW7AkV0t1";
+const app=initializeApp(firebaseConfig),auth=getAuth(app),db=getFirestore(app);setPersistence(auth,browserLocalPersistence);let u,S={weekEarned:0,balance:0,goal:{}},J=[],L=[],R=[],Q=[],H=[],T=[];const $=x=>document.getElementById(x),m=n=>'$'+Number(n||0).toFixed(2),show=x=>['login','kid','parent'].forEach(y=>$(y).classList.toggle('hidden',y!=x));
+window.doLogin=async()=>{try{await signInWithEmailAndPassword(auth,$('email').value.trim(),$('password').value)}catch(e){$('msg').textContent='Sign-in failed. Check email and password.'}};window.doLogout=()=>signOut(auth);
+onAuthStateChanged(auth,async x=>{u=x;if(!u)return show('login');if(u.uid===PARENT_UID){show('parent');await seed();listen(true)}else{show('kid');listen(false)}});
+async function seed(){let s=doc(db,'app','state');if((await getDoc(s)).exists())return;await setDoc(s,{weekEarned:0,balance:0,goal:{name:'',amount:0}});for(let x of[['🛏️','Make my bed'],['🧸','Pick up my toys'],['👕','Clothes in hamper'],['🍽️','Clear my dishes']])await addDoc(collection(db,'responsibilities'),{icon:x[0],name:x[1]});for(let x of[['🗑️','Empty trash',.5],['🧺','Put away laundry',.5],['🧹','Vacuum an area',.75],['🚗','Help clean the car',1],['🌳','Help with yard work',1.5],['🍽️','Help with dishwasher',.5]])await addDoc(collection(db,'library'),{icon:x[0],name:x[1],value:x[2]})}
+function listen(p){onSnapshot(doc(db,'app','state'),x=>{if(x.exists())S=x.data();render(p)});for(let [c,k]of[['weekJobs','J'],['library','L'],['responsibilities','R'],['submissions','Q'],['history','H'],['transactions','T']])onSnapshot(collection(db,c),x=>{let a=x.docs.map(d=>({id:d.id,...d.data()}));if(k==='J')J=a;if(k==='L')L=a;if(k==='R')R=a;if(k==='Q')Q=a;if(k==='H')H=a;if(k==='T')T=a;render(p)})}
+function render(p){if(!p){$('kw').textContent=m(S.weekEarned);$('kb').textContent=m(S.balance);if(S.goal?.name){$('goal').classList.remove('hidden');$('goal').innerHTML='<h2>🎯 Saving for '+S.goal.name+'</h2><b>'+m(S.balance)+' of '+m(S.goal.amount)+'</b>'}else $('goal').classList.add('hidden');$('resps').innerHTML=R.map(x=>jobHTML(x,'responsibility')).join('')||'No responsibilities.';$('jobs').innerHTML=J.map(x=>jobHTML(x,'moneyJob')).join('')||'No money jobs assigned.';return}renderParent()}
+function jobHTML(x,type){let q=Q.find(a=>a.jobId===x.id&&a.type===type);return `<div class="job"><span style="font-size:28px">${x.icon}</span><div class="grow"><b>${x.name}</b>${type==='moneyJob'?'<div class="money">'+m(x.value)+'</div>':''}</div>${x.approved?'<span class="pill done">Approved ✓</span>':q?'<span class="pill">Waiting 👍</span>':`<button class="btn ${type==='moneyJob'?'good':'sec'}" onclick="submit('${x.id}','${type}')">DONE ✓</button>`}</div>`}
+window.submit=async(id,type)=>{let x=(type==='moneyJob'?J:R).find(a=>a.id===id);await addDoc(collection(db,'submissions'),{jobId:id,jobName:x.name,value:type==='moneyJob'?Number(x.value):0,type,submittedBy:u.uid,submittedAt:serverTimestamp()})};
+function renderParent(){$('pw').textContent=m(S.weekEarned);$('pb').textContent=m(S.balance);$('ap').innerHTML='<h2>👍 Approvals</h2>'+(Q.map(x=>`<div class="job"><div class="grow"><b>${x.jobName}</b><div class="small">${x.type==='moneyJob'?m(x.value):'Responsibility'}</div></div><button class="btn good" onclick="approve('${x.id}')">Approve</button><button class="btn danger" onclick="reject('${x.id}')">No</button></div>`).join('')||'Nothing waiting.');
+$('wk').innerHTML=`<h2>📅 This Week</h2><select id="sel">${L.map(x=>`<option value="${x.id}">${x.icon} ${x.name} — ${m(x.value)}</option>`).join('')}</select><button class="btn" onclick="addWeek()">+ Add Job</button>${J.map(x=>`<div class="job"><div class="grow">${x.icon} <b>${x.name}</b> ${m(x.value)}</div><button class="btn danger" onclick="removeWeek('${x.id}')">Remove</button></div>`).join('')}<button class="btn sec" style="margin-top:12px" onclick="newWeek()">Start New Week</button>`;
+$('lib').innerHTML=`<h2>🧰 Job Library</h2>${L.map(x=>`<div class="job"><div class="grow">${x.icon} <b>${x.name}</b> ${m(x.value)}</div><button class="btn danger" onclick="delLib('${x.id}')">Delete</button></div>`).join('')}<h3>Add Job</h3><input id="ni" value="⭐"><input id="nn" placeholder="Job name"><input id="nv" type="number" step=".25" value=".50"><button class="btn" onclick="addLib()">Save Job</button><h3>Responsibilities</h3>${R.map(x=>`<div class="job"><div class="grow">${x.icon} <b>${x.name}</b></div><button class="btn danger" onclick="delResp('${x.id}')">Delete</button></div>`).join('')}<input id="ri" value="⭐"><input id="rn" placeholder="New responsibility"><button class="btn sec" onclick="addResp()">Add Responsibility</button>`;
+$('mon').innerHTML=`<h2>💵 Money</h2><label>Saving for</label><input id="gn" value="${S.goal?.name||''}"><label>Goal amount</label><input id="ga" type="number" value="${S.goal?.amount||''}"><button class="btn" onclick="goalSave()">Save Goal</button><h3>Record Spending</h3><input id="sn" placeholder="What did he buy?"><input id="sa" type="number" step=".01" placeholder="Amount"><button class="btn sec" onclick="spend()">Record Purchase</button>`;
+$('hist').innerHTML='<h2>📚 History</h2><h3>Weekly Earnings</h3>'+H.map(x=>`<div class="job"><div class="grow">${x.label}</div><b>${m(x.earned)}</b></div>`).join('')+'<h3>Money Activity</h3>'+T.map(x=>`<div class="job"><div class="grow">${x.note}</div><b>${x.amount>=0?'+':''}${m(x.amount)}</b></div>`).join('')}
+window.tab=n=>['ap','wk','lib','mon','hist'].forEach(x=>$(x).classList.toggle('hidden',x!==n));
+window.approve=async id=>{let x=Q.find(a=>a.id===id),b=writeBatch(db);if(x.type==='moneyJob'){b.update(doc(db,'weekJobs',x.jobId),{approved:true});b.update(doc(db,'app','state'),{weekEarned:increment(Number(x.value)),balance:increment(Number(x.value))});b.set(doc(collection(db,'transactions')),{note:'Earned: '+x.jobName,amount:Number(x.value),createdAt:serverTimestamp()})}b.delete(doc(db,'submissions',id));await b.commit()};window.reject=id=>deleteDoc(doc(db,'submissions',id));
+window.addWeek=async()=>{let x=L.find(a=>a.id===$('sel').value);if(x)await addDoc(collection(db,'weekJobs'),{icon:x.icon,name:x.name,value:Number(x.value),approved:false,createdAt:serverTimestamp()})};window.removeWeek=id=>deleteDoc(doc(db,'weekJobs',id));
+window.addLib=()=>addDoc(collection(db,'library'),{icon:$('ni').value||'⭐',name:$('nn').value.trim(),value:Number($('nv').value)||0});window.delLib=id=>deleteDoc(doc(db,'library',id));window.addResp=()=>addDoc(collection(db,'responsibilities'),{icon:$('ri').value||'⭐',name:$('rn').value.trim()});window.delResp=id=>deleteDoc(doc(db,'responsibilities',id));
+window.goalSave=()=>updateDoc(doc(db,'app','state'),{goal:{name:$('gn').value.trim(),amount:Number($('ga').value)||0}});window.spend=async()=>{let a=Number($('sa').value),n=$('sn').value.trim();if(!a||!n)return;let b=writeBatch(db);b.update(doc(db,'app','state'),{balance:increment(-a)});b.set(doc(collection(db,'transactions')),{note:'Spent: '+n,amount:-a,createdAt:serverTimestamp()});await b.commit()};
+window.newWeek=async()=>{if(!confirm("Start a new week? Weekly earnings reset; running balance stays."))return;let b=writeBatch(db);b.set(doc(collection(db,'history')),{label:'Week ending '+new Date().toLocaleDateString(),earned:Number(S.weekEarned||0),createdAt:serverTimestamp()});b.update(doc(db,'app','state'),{weekEarned:0});J.forEach(x=>b.delete(doc(db,'weekJobs',x.id)));Q.forEach(x=>b.delete(doc(db,'submissions',x.id)));await b.commit()}
+</script></body></html>

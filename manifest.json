@@ -1,9 +1,8 @@
 {
-  "name": "Graham's Chores",
+  "name": "Graham's Chores V2",
   "short_name": "Chores",
   "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#f7f7fb",
-  "theme_color": "#f7f7fb",
-  "description": "A simple chore and allowance tracker for Graham."
+  "theme_color": "#f7f7fb"
 }
