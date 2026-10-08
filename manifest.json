@@ -1,7 +1,7 @@
 {
-  "name": "Graham's Chores V2",
-  "short_name": "Chores",
-  "start_url": "./index.html",
+  "name": "Graham's Chores V3",
+  "short_name": "Chores V3",
+  "start_url": "./index.html?v=3",
   "display": "standalone",
   "background_color": "#f7f7fb",
   "theme_color": "#f7f7fb"
